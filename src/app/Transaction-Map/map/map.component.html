@@ -1,0 +1,337 @@
+<div class="card">
+  <div class="card-header">
+  <div *ngIf="!isprofessional && !isSellerTran" class="col-sm-6 col-lg-6 ">
+    <div class="form-group">
+      <label><h3>Select Your Business</h3></label>
+      <ng-select
+        [items]="businessList"
+        [(ngModel)]="companyId"
+        bindLabel="TITLE"
+        bindValue="COMPANY_ID"
+        placeholder="Select Business"
+        (change)="changeCompany()"
+      >
+      <ng-template ng-label-tmp let-item="item">
+        <img height="15" width="15" [src]="item.avatar"/>
+        {{item.TITLE}}, {{item.ADDRESS}} ({{item.TRAN_ID}})
+      </ng-template>
+      <ng-template ng-option-tmp let-item="item">
+        {{item.TITLE}}, {{item.ADDRESS}}  ({{item.TRAN_ID}})      
+      </ng-template>
+      </ng-select>
+    </div>
+  </div>
+
+  <div *ngIf="isSellerTran" class="col-sm-6 col-lg-6 ">
+    <div class="form-group">
+      <label><h3>Select Your Business</h3></label>
+      <ng-select
+        [items]="sellerList"
+        [(ngModel)]="companyId"
+        bindLabel="TITLE"
+        bindValue="COMPANY_ID"
+        placeholder="Select Business"
+        (change)="changeCompany()"
+      >
+      <ng-template ng-label-tmp let-item="item">
+        <img height="15" width="15" [src]="item.avatar"/>
+        {{item.TITLE}}, {{item.ADDRESS}} ({{item.TRAN_ID}})
+      </ng-template>
+      <ng-template ng-option-tmp let-item="item">
+        {{item.TITLE}}, {{item.ADDRESS}} ({{item.TRAN_ID}})       
+      </ng-template>
+      </ng-select>
+    </div>
+  </div>
+
+  <div *ngIf="isprofessional" class="col-sm-6 col-lg-6 ">
+    <div class="form-group">
+      <label><h3>Choose Role</h3></label>     
+      <ng-select
+        [items]="agentType"
+        bindLabel="name"
+        bindValue="value"  
+        placeholder="Select Role"
+        [(ngModel)]="user_role"
+        (change)="onRoleChange()"
+      >
+      </ng-select>
+    </div>
+  </div>
+
+  <div *ngIf="isBuyer || isSeller" class="col-sm-6 col-lg-6 ">
+    <div class="form-group">
+      <label><h3>Select Your Business</h3></label>
+      <ng-select
+        [items]="professionalList"
+        [(ngModel)]="tranId"
+        bindLabel="TITLE"
+        bindValue="TRAN_ID"
+        placeholder="Select Business"
+        (change)="changeTransaction()"
+      >
+      <ng-template ng-label-tmp let-item="item">
+        <img height="15" width="15" [src]="item.avatar"/>
+        {{item.TITLE}}, {{item.ADDRESS}} ({{item.TRAN_ID}})
+      </ng-template>
+      <ng-template ng-option-tmp let-item="item">
+        {{item.TITLE}}, {{item.ADDRESS}} ({{item.TRAN_ID}})       
+      </ng-template>
+      </ng-select>
+    </div>
+  </div>
+
+  <!-- <div class="row"> -->
+      <!-- <div>
+          <button
+            type="button"
+            class="btn btn-primary pull-right"
+            data-toggle="modal"
+            (click)="isProcess = !isProcess"
+          >
+            <i class="fa fa-search"></i>&nbsp; View Process
+          </button>
+        </div> -->
+  <!-- </div> -->
+</div>
+</div>
+
+<div *ngIf='isProcess'>
+    <ul class="list-unstyled multi-steps">
+        <li
+          *ngFor="let l of CheckList"
+          [ngClass]="{ 'is-active': l.STATUS == 0 }"
+        >
+          {{ l.STEPS }}
+        </li>
+      </ul>
+</div>
+
+<div class="card">
+  <div *ngIf="isbuyerList && !isProcess" class="card-body"> 
+    <div  class="table-responsive">
+      <table class="table">
+        <thead class=" text-primary">
+          <th>Business</th>
+          <th>Address</th>
+          <th>Price</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ buyerListBiz[0].TITLE }}</td>
+            <td>{{ buyerListBiz[0].ADDRESS }}</td>
+            <td>{{ buyerListBiz[0].PRICE | currency }}</td>
+          </tr>
+          <tr>
+            <td colspan="6">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead class=" text-primary">
+                    <th>Seller</th>
+                    <th>Principle Agent</th>
+                    <th>Service</th>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{{ buyerListBiz[0].SELLER }}</td>
+                      <td>
+                        <a
+                          (click)="
+                            navigateProfDetail(buyerListBiz[0].SELLER_PROF_ID)
+                          "
+                          style="text-decoration-line: underline;cursor:pointer"
+                        >
+                          {{ buyerListBiz[0].SELLER_PROF }}
+                        </a>
+                      </td>
+                      <td>
+                        <!-- <a
+                          (click)="viewBizServices(buyerListBiz[0].COMPANY_ID)"
+                          style="text-decoration-line: underline;cursor:pointer"
+                        >
+                          View Service</a
+                        > -->
+                        <button
+                            type="button"
+                            style="margin-left:5px"
+                            class="btn btn-sm btn-info"
+                            (click)="viewBizServices(buyerListBiz[0].COMPANY_ID)"
+                          >
+                          <i class="fa fa-search"></i>&nbsp;  View Services
+                          </button>
+                      </td>
+                    </tr>
+                    <tr *ngIf="selected_ComId == buyerListBiz[0].COMPANY_ID">
+                      <td colspan="6">
+                        <div class="table-responsive">
+                          <table class="table">
+                            <thead class=" text-primary">
+                              <th>Professional</th>
+                              <th>Name</th>
+                              <th>Mail</th>
+                            </thead>
+                            <tbody *ngFor="let l of seller_services">
+                              <tr>
+                                <td>{{ l.SERVICE_TYPE }}</td>
+                                <td>{{ l.USERNAME }}</td>
+                                <td>{{ l.EMAIL }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="6">
+              <div class="table-responsive">
+                <table class="table">
+                  <thead class=" text-primary">
+                    <th>Transaction Id</th>
+                    <th>Buyer</th>
+                    <th>Principle Agent</th>
+                    <th>Offer Price </th>
+                    <th>Action</th>
+                  </thead>
+                  <tbody
+                    *ngFor="
+                      let l of (buyerListBiz
+                        | paginate: { itemsPerPage: 8, currentPage: p })
+                    "
+                  >
+                    <tr>
+                      <td>{{ l.TRAN_ID }}</td>
+                      <td>{{ l.BUYER }}</td>
+                      <td>
+                        <a
+                          (click)="navigateProfDetail(l.BUYER_PROF_ID)"
+                          style="text-decoration-line: underline;cursor:pointer"
+                        >
+                          {{ l.BUYER_PROF }}
+                        </a>
+                      </td>
+                      <td>{{l.OFFER_PRICE}}</td>
+                      <td>
+                        <!-- <a
+                          (click)="addServices(l.TRAN_ID)"
+                          style="text-decoration-line: underline;cursor:pointer"
+                        >
+                          View Service</a
+                        >
+                        &nbsp;&nbsp;
+                        <a
+                          (click)="processTran(l.TRAN_ID)"
+                          style="text-decoration-line: underline;cursor:pointer"
+                        >
+                          View Process</a
+                        > -->
+
+                        <div class="row">
+                            <button
+                            type="button"
+                            style="margin-left:5px"
+                            class="btn btn-sm btn-info"
+                            (click)="addServices(l.TRAN_ID)"
+                          >
+                          <i class="fa fa-search"></i>&nbsp;  View Services
+                          </button>
+                          <button
+                            type="button"
+                            style="margin-left:5px"
+                            class="btn btn-sm btn-info"
+                            (click)="processTran(l.TRAN_ID)"
+                          >
+                          <i class="fa fa-search"></i>&nbsp;  View Process
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <!-- Process Overview For Each Transaction -->
+                    <tr *ngIf="process_TranId == l.TRAN_ID">
+                    <td colspan="6">
+                      <div class="container-fluid">
+                        <ul class="list-unstyled multi-steps">
+                            <li
+                              *ngFor="let l of CheckList"
+                              [ngClass]="{ 'is-active': l.STATUS == 0 }"
+                            >
+                              {{ l.STEPS }}
+                            </li>
+                          </ul>
+                    </div>
+                  </td>
+                    </tr>
+                  <!-- Services For Each Transaction -->
+                    <tr *ngIf="selected_TranId == l.TRAN_ID">
+                      <td colspan="6">
+                        <div class="table-responsive">
+                          <table class="table">
+                            <thead class=" text-primary">
+                              <th>Professional</th>
+                              <th>Name</th>
+                              <th>Mail</th>
+                            </thead>
+                            <tbody *ngFor="let l of services_list">
+                              <tr>
+                                <td>{{ l.SERVICE_TYPE }}</td>
+                                <td>{{ l.USERNAME }}</td>
+                                <td>{{ l.EMAIL }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="isSellerLogin">
+            <button type="button" class="btn btn-warning" 
+            (click)="moreBuyerDetails()">More Buyer</button>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div
+        *ngIf="isbuyerList"
+        class="row justify-content-center"
+        style="margin:1rem;font-weight:bold;"
+      >
+        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+      </div>
+  </div>
+
+  <div *ngIf="isProcess && isBuyerLogin">
+    <div class="card-body">
+      <div class="row">
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let l of CheckList">
+              <div class="form-group">
+                {{ l.ORDER_NUM }}.&nbsp; {{ l.STEPS }} &nbsp;&nbsp;
+                <input
+                  
+                  type="checkbox"
+                  [checked]="l.STATUS"
+                  style="float:right"
+                  (change)="toggleVisibility(l.ORDER_NUM)"
+                />
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div> 
+    </div>
+    <div class="card-footer">
+        <button type="button" class="btn btn-success" (click)="updateProcess()">
+          <i class="fa fa-plus"></i> Update
+        </button>
+      </div>
+  </div>
+</div>
