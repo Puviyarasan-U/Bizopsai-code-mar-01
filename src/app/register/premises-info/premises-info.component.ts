@@ -126,36 +126,27 @@ export class PremisesInfoComponent implements OnInit {
     this.submitted = true;
     this.landlord.insertPremisesInfo(this.premises.value).subscribe(
       data => {                 
-        var res = data;
-        if (res > 0) { 
-
-          if(this.primeImg.length>0){         
+        var res = data;        
+          if(res > 0 && this.primeImg.length>0){         
           this.PrimeImgUploader.setOptions({ additionalParameter: { Company_ID: this.premises.value.BizID } });      
           this.PrimeImgUploader.uploadAll();                                     
-          this.PrimeImgUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-            if (response === 'Uploaded Sucessfully') {
-
-              if(this.SecImg.length>0){
+          this.PrimeImgUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => { 
+              if(response === 'Uploaded Sucessfully' && this.SecImg.length>0){
                 this.SecImgUploader.setOptions({ additionalParameter: { Company_ID: this.premises.value.BizID } });
-                this.SecImgUploader.uploadAll();
-             
-               this.SecImgUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                if (response === 'Uploaded Sucessfully') {
-                    //alert("Sucessfully Uploaded!!!");
+                this.SecImgUploader.uploadAll();             
+                this.SecImgUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                if (response === 'Uploaded Sucessfully') {                  
                     this.talk.emit('4');
                 }
               }             
             } else {
               this.talk.emit('4');
-            }
-
-            } 
+            }           
           }
         } else{
           this.talk.emit('4');
 
-        } 
-    } 
+        }   
   },
   error => {
     alert("Server Error Please Try After Sometime!!!");
