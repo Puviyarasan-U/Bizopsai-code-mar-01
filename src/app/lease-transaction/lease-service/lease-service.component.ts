@@ -1,14 +1,17 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
 import { Router } from "@angular/router";
 
 import { NodeService } from "../../services/Nodeservice";
+import { LandlordService } from '../../services/landlord.service';
+
 
 @Component({
-  selector: "app-services",
-  templateUrl: "./services.component.html",
-  styleUrls: ["./services.component.scss"]
+  selector: 'app-lease-service',
+  templateUrl: './lease-service.component.html',
+  styleUrls: ['./lease-service.component.scss']
 })
-export class ServicesComponent implements OnInit {
+export class LeaseServiceComponent implements OnInit {
+
   user_role;
   isBuyer: boolean;
   isSeller: boolean;
@@ -38,7 +41,10 @@ export class ServicesComponent implements OnInit {
   isUserPropList = false;
   selected_ComId: any;
 
-  constructor(private user: NodeService, public router: Router) {}
+  constructor(private user: NodeService, 
+    private landlord: LandlordService,
+    public router: Router,
+     ) {}
 
   ngOnInit() {
     if (sessionStorage.length) {
@@ -50,48 +56,48 @@ export class ServicesComponent implements OnInit {
       }
     }
 
-    this.user.getBizbyUser(this.user_id).subscribe(
-      userPropertyList => {
-        let rows = userPropertyList;
-        if (rows.length > 0) {
-          if (rows[0].status) {
-            this.isUserPropList = false;
-          } else {
-            this.userPropertyList = rows;
-            this.isUserPropList = true;
-          }
-        } else {
-          alert("No Data");
-        }
-        this.user.getSavedList(this.user_id).subscribe(buyerSavedList => {
-          this.Data = buyerSavedList;
-          if (this.Data.length > 0) {
-            if (this.Data[0].status) {
-              this.isList = false;
-            } else {
-              this.buyerList = this.Data;
-              this.isList = true;
-            }
-          } else {
-            alert("No Data");
-          }
-          this.user.checkFirstUser(this.user_id).subscribe(
+    
+          this.landlord.getLeaseType(this.user_id).subscribe(
             userType=>{
               var res = userType;             
-                if(res[0].ID == 1){
+                if(res[0].USER_TYPE == 3){
                   this.isSeller =true;
-                } else if(res[0].ID == 2){
+
+                  this.landlord.getLeaseByUserID(this.user_id).subscribe(
+                    userPropertyList => {
+                      let rows = userPropertyList;
+                      if (rows.length > 0) {
+                        if (rows[0].status) {
+                          this.isUserPropList = false;
+                        } else {
+                          this.userPropertyList = rows;
+                          this.isUserPropList = true;
+                        }
+                      } else {
+                        alert("No Data");
+                      }
+                    });
+
+                } else if(res[0].USER_TYPE == 4){
                   this.isBuyer = true;
+                  this.landlord.getTenantLeaseList(this.user_id).subscribe(buyerSavedList => {
+                    this.Data = buyerSavedList;
+                    if (this.Data.length > 0) {
+                      if (this.Data[0].status) {
+                        this.isList = false;
+                      } else {
+                        this.buyerList = this.Data;
+                        this.isList = true;
+                      }
+                    } else {
+                      alert("No Data");
+                    }
+                  });
                 }
-            });
-
-
-        });
-      },
-      error => {
-        alert("Server Error");
-      }
-    );
+            },
+            error => {
+              alert("Server Error");
+            });      
   }
 
   onRoleChange(value) {
@@ -114,6 +120,7 @@ export class ServicesComponent implements OnInit {
     this.router.navigate(["/operate/hire"], {
        queryParams: { ComId: value, service:'Principle Agent', type: "add" } });
   }
+  
   updateProf(value) {
     this.router.navigate(["/operate/hire"], {
       queryParams: { ComId: value, service: 'Principle Agent', type: "update" }
@@ -293,4 +300,5 @@ export class ServicesComponent implements OnInit {
       }
     });
   }
+
 }

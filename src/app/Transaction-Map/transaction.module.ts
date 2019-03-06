@@ -1,10 +1,7 @@
 import { NgModule } from '@angular/core';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { NguiMapModule} from '@ngui/map';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpModule } from '@angular/http';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
-//import { TabsModule } from 'ngx-bootstrap/tabs';
 import { PdfViewerModule } from 'ng2-pdf-viewer';
 
 import { SharedModule } from '../shared/shared.module';
@@ -18,9 +15,7 @@ import { TransactionRoutingModule } from '../Transaction-Map/transaction-routing
     imports: [
     
       NgbModule,     
-      SharedModule,     
-      HttpClientModule,
-      HttpModule,     
+      SharedModule,
     //  TabsModule,
       BsDropdownModule,
       PdfViewerModule,
@@ -38,11 +33,7 @@ import { TransactionRoutingModule } from '../Transaction-Map/transaction-routing
     ],
     exports: [ ],
     providers: [
-        // ListService,
-        // NodeService,
-        // HomeNodeService,       
-        // EquipmentService,
-        // SellerService,        
+               
       ],
   })
   export class TransactionModule { }

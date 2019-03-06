@@ -48,7 +48,7 @@ export class LandlordRegisterComponent implements OnInit {
             BirthPlace: [''],
             HomeNum1: [''],
             HomeNum2: [''],
-            UserType: ['']
+            UserType: [3]
       }),
       business: this.fb.group({
         UserID: [''],
@@ -108,7 +108,6 @@ export class LandlordRegisterComponent implements OnInit {
   }
 
   talkBack(e: any) { 
-
     if(e.Biz_ID){
       this.Biz_ID = e.Biz_ID;     
       this.checkoutForm.patchValue({

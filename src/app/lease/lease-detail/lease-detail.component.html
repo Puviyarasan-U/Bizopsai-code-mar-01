@@ -59,17 +59,15 @@
         </div>
 
 
-        <div class="col-md-6 col-lg-6">
-          <!-- <div class="card"> -->
+        <div class="col-md-6 col-lg-6">         
             <div class="card-body">
               <div class="embed-responsive embed-responsive-16by9">
                 <div [innerHtml]="yt_url"></div>
-              </div>
-           
-          <!-- </div> -->
+              </div>          
+         
           <br>
           <div class="button-container">
-           <button *ngIf="alreadyInterest" type="button" (click)="saveList(list.COMPANY_ID)" class="btn btn-success ">
+           <button *ngIf="!alreadySave"  type="button" (click)="saveList(list.BIZ_ID)" class="btn btn-success ">
               I'm Interested </button>
             <button *ngIf="alreadySave" type="button" class="btn btn-info">
                 View Checklist </button>

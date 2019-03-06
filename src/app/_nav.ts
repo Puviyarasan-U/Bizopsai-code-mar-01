@@ -101,8 +101,20 @@ export const professionalNav =[
   
   {
     name: 'Transaction Map',
-    url: '/tran/map',
+   // url: '/tran/map',
     icon: 'icon-map', 
+     children: [
+          {
+            name: 'Buy Sell Transaction',
+            url: '/tran/map',
+            icon: 'icon-cursor'
+          },
+          {
+            name: 'Lease Transaction',
+            url: '/lease-transaction',
+            icon: 'icon-cursor'
+          },
+        ]
   }, 
   {
     name: 'Data Room ',

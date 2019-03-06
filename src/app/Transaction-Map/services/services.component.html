@@ -223,9 +223,9 @@
                         <td *ngIf='valuationService.length > 0;else elseB'> {{valuationService[0].EMAIL}} </td>
                         <td *ngIf='valuationService.length >0;else addValuation'> 
                             <a style="text-decoration-line: underline;cursor:pointer"
-                             (click)='changeService(l.COMPANY_ID,"valuation")'>Change</a>&nbsp;
+                             (click)='changeBizService(l.COMPANY_ID,"valuation")'>Change</a>&nbsp;
                             <a style="text-decoration-line: underline;cursor:pointer"
-                             (click)='removeService(l.COMPANY_ID,"valuation",valuationService[0].PROF_ID)'>Remove</a>
+                             (click)='removeBizService(l.COMPANY_ID,"valuation",valuationService[0].PROF_ID)'>Remove</a>
                        </td>
                        <ng-template #addValuation>
                            <td> 

@@ -55,6 +55,7 @@ import { ComponentsModule } from './components/components.module';
 import { SharedModule } from './shared/shared.module';
 import { DataRoomModule } from './data-room/data-room.module';
 import { RegisterModule } from './register/register.module';
+import { LeaseTransactionModule } from './lease-transaction/lease-transaction.module';
 
 
 @NgModule({
@@ -77,6 +78,7 @@ import { RegisterModule } from './register/register.module';
     SellModule,
     GridModule,
     DataRoomModule,
+    LeaseTransactionModule,
     RegisterModule,
     NgbModule,
     TransactionModule,
@@ -95,8 +97,8 @@ import { RegisterModule } from './register/register.module';
     P500Component,
     LoginComponent,
     RegisterComponent,
-    ProfessionalRegisterComponent,   
-    LandingComponent   
+    ProfessionalRegisterComponent,      
+    LandingComponent
   ],
   providers: [{
     provide: LocationStrategy,

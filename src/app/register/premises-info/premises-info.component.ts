@@ -145,7 +145,6 @@ export class PremisesInfoComponent implements OnInit {
           }
         } else{
           this.talk.emit('4');
-
         }   
   },
   error => {

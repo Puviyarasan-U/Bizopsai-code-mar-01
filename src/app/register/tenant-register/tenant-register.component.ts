@@ -16,18 +16,27 @@ export class TenantRegisterComponent implements OnInit {
 
   ngOnInit() {
     this.checkoutForm = this.fb.group({
-      fullName: ['']
+      personal: this.fb.group({
+        UserID: [''],
+        Name: [''],     
+        HomeAddress: [''],     
+        Email: [''],
+        FaxNumber: [''],
+        CellPhone: [''],
+        HomePhone: [''],     
+        DOB: [''],
+        BirthPlace: [''],
+        HomeNum1: [''],
+        HomeNum2: [''],
+        UserType: [4]
+      }),  
     })
-  }
 
-  formInitialized(name: string, form: FormGroup) {
-    this.checkoutForm.setControl(name, form);
-  }
+    console.log(this.checkoutForm.value)
+  }  
 
-  talkBack(e: string) {
-  
-   console.log(e);
-   this.tabs.select(e);
+  talkBack(e: any) { 
+    this.tabs.select(e);
   }
 
 }

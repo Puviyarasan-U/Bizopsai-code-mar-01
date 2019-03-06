@@ -12,6 +12,7 @@ import { ProfessionalRegisterComponent } from './views/professional-register/pro
 import { ProfessionalDetailComponent } from './operate/professional-detail/professional-detail.component';
 
 
+
 export const routes: Routes = [
   {
     path: '',
@@ -77,6 +78,8 @@ export const routes: Routes = [
       {path: 'admin', loadChildren: './admin/admin.module#AdminModule', canActivate: [AuthGuard]},
       {path: 'data', loadChildren: './data-room/data-room.module#DataRoomModule', canActivate: [AuthGuard]},
       {path: 'form', loadChildren: './register/register.module#RegisterModule', },
+      {path: 'lease-transaction', loadChildren: './lease-transaction/lease-transaction.module#LeaseTransactionModule', },
+
      
       {
         path: 'professional-detail',

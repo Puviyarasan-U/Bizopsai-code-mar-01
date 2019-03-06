@@ -5,13 +5,14 @@ import { NodeService } from "../../services/Nodeservice";
 import { HomeNodeService } from "../../services/HomeNodeService";
 import { BuyerService } from "../../services/buyer.service";
 import { ProcessService } from "../../services/process.service";
+import { LandlordService } from '../../services/landlord.service';
 
 @Component({
   selector: "app-map",
-  templateUrl: "./map.component.html",
-  styleUrls: ["./map.component.scss"]
+  templateUrl: "./lease-map.component.html",
+  styleUrls: ["./lease-map.component.scss"]
 })
-export class MapComponent implements OnInit {
+export class LeaseMapComponent implements OnInit {
   user_name: any;
   user_id: any;
   isUser = false;
@@ -41,7 +42,7 @@ export class MapComponent implements OnInit {
   professionalList: any;
   tranId: any;
   // citySize = ["Buyer", "Seller"];
-  agentType = [{name:'Buyer Agent',value:'Buyer'},{name:'Seller Agent', value:'Seller'}];  
+  agentType = [{name:'Landlord Agent',value:'Landlord'},{name:'Tenant Agent', value:'Tenant'}];  
   user_role;
   isBuyer: boolean;
   isSeller: boolean;
@@ -63,6 +64,8 @@ export class MapComponent implements OnInit {
     private buyer: BuyerService,
     private process: ProcessService,
     private route: ActivatedRoute, 
+    private landlord: LandlordService,
+
   ) {}
 
   ngOnInit() {
@@ -83,12 +86,12 @@ export class MapComponent implements OnInit {
             } 
     });
 
-    this.user.checkFirstUser(this.user_id).subscribe(
+    this.landlord.getLeaseType(this.user_id).subscribe(
       userType=>{
         var res = userType;       
-          if(res[0].ID == 1){ // Seller
+          if(res[0].USER_TYPE == 3){ // Seller
             this.isSellerLogin = true;
-            this.user.getBuyerInterestList(this.user_id)
+            this.landlord.getTenantInterestList(this.user_id)
             .subscribe(buyerInterestList => {
               let res = buyerInterestList;
               if (res.length > 0) {
@@ -96,11 +99,11 @@ export class MapComponent implements OnInit {
                   this.isList = false;
                 } else {
                   this.sellerList = res;
-                  this.companyId = this.sellerList[0].COMPANY_ID;
+                  this.companyId = this.sellerList[0].BUS_ENT_ID;
                   this.changeCompany();
                 }
               }
-              this.user.getBizbyUser(this.user_id).subscribe(
+              this.landlord.getLeaseByUserID(this.user_id).subscribe(
                 data => {
                   var buyerRes = data;
                   let rows = buyerRes;
@@ -116,13 +119,14 @@ export class MapComponent implements OnInit {
                 },
                 error => {
                   alert("Server Error");
-                }
-              );
+                });
+
               });            
           } 
-          else if(res[0].ID == 2){ // Buyer
+          else if(res[0].USER_TYPE == 4){ // Buyer
             this.isBuyerLogin = true;
-            this.user.getSavedList(this.user_id).subscribe(buyerSavedList => {
+            this.landlord.getTenantLeaseList(this.user_id).subscribe(
+              buyerSavedList => {
               var buyer_res = buyerSavedList;
               if (buyer_res.length > 0) {
                 if (buyer_res[0].status) {
@@ -130,33 +134,15 @@ export class MapComponent implements OnInit {
                 } else {
                   this.isSellerTran = true;
                   this.sellerList = buyer_res;
-                  this.companyId = this.sellerList[0].COMPANY_ID;
+                  this.companyId = this.sellerList[0].BUS_ENT_ID;
                   this.changeCompany();
                 }
               } else {
                 alert("No Data");
-              }
-              this.user.getBizbyUser(this.user_id).subscribe(
-                data => {
-                  var buyerRes = data;
-                  let rows = buyerRes;
-                  if (rows.length > 0) {
-                    if (rows[0].status) {
-                    } else {
-                      this.businessList = rows;
-                    }  
-                   
-                  } else {
-                    alert("No Data");
-                  }
-                },
-                error => {
-                  alert("Server Error");
-                }
-              );
+              }              
             });
-          }
-          else if(res[0].ID == 3){ // Professional
+          }          
+          else { // Professional
             this.home.getProfessionalList().subscribe(data => {
               var professional_Mstr = data;
               var checkProfessional = professional_Mstr.filter(item => {
@@ -165,24 +151,25 @@ export class MapComponent implements OnInit {
               if (checkProfessional.length > 0) {
                 this.isprofessional = true;
                 this.prof_id = checkProfessional[0].ID;
-                this.user_role = "Seller";
+                this.user_role = "Landlord";
                 this.onRoleChange();
               } else {
                 this.isprofessional = false;
               }
             });
           } 
+
       });      
   }
 
 
 
-  onRoleChange() { 
-    if (this.user_role == "Buyer") {
+  onRoleChange() {  
+    if (this.user_role == "Landlord") {
       this.isBuyer = true;
       this.isSeller = false;
       this.professionalList = [];    
-      this.process.getProfBuyerList(this.prof_id).subscribe(profBuyerData=>{
+      this.landlord.getProfLandlordList(this.prof_id).subscribe(profBuyerData=>{
         var res = profBuyerData;
            if (res.length > 0) {
           if (res[0].status) {
@@ -196,12 +183,12 @@ export class MapComponent implements OnInit {
         }
       });
     } 
-    else if (this.user_role == "Seller") {
+    else if (this.user_role == "Tenant") {
       this.isSeller = true;
       this.isBuyer = false;
       this.professionalList = [];     
 
-      this.process.getProfSellerList(this.prof_id).subscribe(profSellerData=>{
+      this.landlord.getProfTenantList(this.prof_id).subscribe(profSellerData=>{
         var res = profSellerData;
            if (res.length > 0) {
           if (res[0].status) {
@@ -221,8 +208,9 @@ export class MapComponent implements OnInit {
     this.isProcess = false;
     this.isComSelected = true;
     this.buyerListBiz = [];
+
     var companyList = this.sellerList.filter(item => {
-      return item.COMPANY_ID === this.companyId;
+      return item.BUS_ENT_ID === this.companyId;
     });
 
     if (companyList.length > 0) {
@@ -290,7 +278,7 @@ export class MapComponent implements OnInit {
     var post = {
       TranId: this.tranId
     }
-    this.process.getDetailsbyTran(post).subscribe(tranDetails=>{
+    this.landlord.getDetailsbyLeaseTran(post).subscribe(tranDetails=>{
       var res = tranDetails;
       if (res.length > 0) {
         if (res[0].status) {
@@ -301,10 +289,12 @@ export class MapComponent implements OnInit {
            if(!this.moreBuyer){
             var split={}
             split = tranDetails[0];
-            this.buyerListBiz.push(split);           
+            this.buyerListBiz.push(split);
+           
        }
        else{
-         this.buyerListBiz = tranDetails; 
+         this.buyerListBiz = tranDetails;
+ 
        }
         }
       } else {
@@ -321,10 +311,10 @@ export class MapComponent implements OnInit {
     } else {
       this.seller_services = [];
       this.selected_ComId = value;
-      var post = {
-        ComId: value,
-        UserId: this.user_id
-      };
+        var post = {
+          ComId: value,
+          UserId: this.user_id
+        };
       this.user.getBizServices(post).subscribe(data => {
         var res = data;
         if (res.length > 0) {

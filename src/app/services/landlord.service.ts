@@ -42,4 +42,67 @@ export class LandlordService {
       .map((res: Response) => res.json());
   }
 
+  saveLeaseList(detail){
+    const url = `${this.apiRoot}/api/tenant/saveLeaseList`
+    return this.http.post(url,detail)
+      .map((res: Response) => res.json());
+  }
+  
+  getLeaseSecImages(id){
+    const url = `${this.apiRoot}/api/lease/getSecImages/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+
+  getLeaseType(id){
+    const url = `${this.apiRoot}/api/lease/getLeaseType/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+
+  getTenantInterestList(id){
+    const url = `${this.apiRoot}/api/lease/getTenantInterestList/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+  
+  getTenantLeaseList(id){
+    const url = `${this.apiRoot}/api/lease/getTenantLeaseList/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+
+  checkExistingTenant(id){
+    const url = `${this.apiRoot}/api/lease/check-isexisting-tenant/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+
+  checkAlreadySaved(id){
+    const url = `${this.apiRoot}/api/lease/checkAlreadySaved/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+
+  getProfLandlordList(id){
+    const url = `${this.apiRoot}/api/lease/getProfLandlordList/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+  
+  getProfTenantList(id){
+    const url = `${this.apiRoot}/api/lease/getProfTenantList/`+ id
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+  }
+
+  getDetailsbyLeaseTran(detail){
+    const url = `${this.apiRoot}/api/lease/getDetailsbyLeaseTran`
+    return this.http.post(url,detail)
+      .map((res: Response) => res.json());
+  }
+
+
+
+
 }
