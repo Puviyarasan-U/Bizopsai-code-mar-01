@@ -32,6 +32,8 @@ export class MainDataRoomComponent implements OnInit {
   isBuyerBank = false;
   isBuyerLicense = false;
   DOC_MSTR: any;
+
+  buyerDataroom = false;
   
 
   constructor( private home: HomeNodeService, private process: ProcessService, 
@@ -84,6 +86,7 @@ export class MainDataRoomComponent implements OnInit {
            //         this.isList = false;           
                   }
                   else {
+                     this.buyerDataroom = true;
                      this.list = res;
                      //this.com_id = this.list[0].COMPANY_ID;
                      //this.onBusinessChange();          
