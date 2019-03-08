@@ -1,5 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
-import { navItems,sellerNav,buyerNav,professionalNav,adminNav } from './../../_nav';
+import { navItems,sellerNav,buyerNav,professionalNav,adminNav,LandlordNav } from './../../_nav';
 import { Router } from '@angular/router';
 import { NodeService } from '../../services/Nodeservice';
 import { AdminService } from '../../services/admin.service';
@@ -68,7 +68,10 @@ export class DefaultLayoutComponent implements OnDestroy {
           }
           else if(res[0].ID == 3){
             this.navItems = professionalNav;
-          }     
+          }  
+          else{
+            this.navItems = LandlordNav
+          }   
       });
     }
     });

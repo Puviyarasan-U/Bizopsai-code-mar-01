@@ -6,7 +6,6 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { SharedModule } from '../shared/shared.module';
 
 import { LeaseTransactionRoutingModule } from './lease-transaction-routing.module';
-
 import { LeaseServiceComponent } from './lease-service/lease-service.component';
 import { LeaseMapComponent } from './lease-map/lease-map.component';
 

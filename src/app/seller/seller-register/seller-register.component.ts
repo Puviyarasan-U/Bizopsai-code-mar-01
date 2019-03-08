@@ -1,7 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FileUploader, FileSelectDirective, FileItem } from 'ng2-file-upload/ng2-file-upload';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { NgbTabChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
@@ -12,7 +12,8 @@ import { EquipmentService } from '../../services/equipment.service';
 import { HomeNodeService } from '../../services/HomeNodeService';
 import { SellerService } from '../../services/seller.service';
 import { ProcessService } from '../../services/process.service';
-
+import { MailService } from '../../services/mail.service';
+// import { MailService} from '../../services/mail.service';
 // const URL = 'http://157.56.179.20:3010/api/upload/';
 // const SECURL = 'http://157.56.179.20:3010/api/upload/multi';
 const URL = 'http://localhost:3010/api/upload';
@@ -27,6 +28,11 @@ const reportsURL = 'http://localhost:3010/api/upload/reportsRep';
 const financialStatementsURL = 'http://localhost:3010/api/upload/finsRep';
 const InsuranceURL = 'http://localhost:3010/api/upload/insuranceRep';
 const ndaURL = 'http://localhost:3010/api/upload/ndaData';
+
+const libilURL = 'http://localhost:3010/api/upload/libil';
+const retireURL = 'http://localhost:3010/api/upload/retirePlan';
+const keyContactURL = 'http://localhost:3010/api/upload/keyConract';
+const federalURL = 'http://localhost:3010/api/upload/federal';
 @Component({
   selector: 'app-seller-register',
   templateUrl: './seller-register.component.html',
@@ -47,7 +53,7 @@ export class SellerRegisterComponent implements OnInit {
 
   order_num:number;
   
-
+ 
   @ViewChild('fileInput') fileInput: ElementRef;
   @ViewChild('tab') public tabs: NgbTabset;
   @ViewChild('closeLogin') closeLogin: ElementRef;
@@ -85,6 +91,7 @@ export class SellerRegisterComponent implements OnInit {
   Comp_id = [];
   CompanyID = '';
   currentState: string;
+  saveProperty:boolean =false;
   // currentState:string;
   minList = [50000, 75000, 100000, 200000, 250000, 500000, 750000, 1000000, 2000000, 3000000, 4000000, 5000000];
   maxList = [50000, 75000, 100000, 200000, 250000, 500000, 750000, 1000000, 2000000, 3000000, 4000000, 5000000];
@@ -142,17 +149,45 @@ export class SellerRegisterComponent implements OnInit {
   finStatementData: any = [];
   InsuranceData: any = [];
   ndaReport: any = [];
+  liData: boolean = false;
+  socData: boolean = false;
+  liReportData: boolean = false;
+  bankData: boolean = false;
+  certData: boolean = false;
+  reportsdata: boolean = false;
+  finsData: boolean = false;
+  InsData: boolean = false;
+  preData: boolean = false;
+  ndaData: boolean = false;
+  priImage: boolean = false;
+  secImage: boolean = false;
+  liblsData:boolean =false;
+  agentEmailAddress:string;
+  retirePlanData:boolean =false;
+  keyContractData:boolean =false;
+  federalPlanData:boolean =false;
+  isSendMail:boolean = true;
   companyStatus = ['Running', 'Dormant'];
+  selectProfessionalStatus = ['Bizops Professionals', 'Create New Professionals'];
   employeesCount = ['1-10', '11-25', '26-50', '51-100', '101-200', '200+'];
   priceList = [100000, 200000, 250000, 500000, 750000, 1000000, 2000000, 3000000, 4000000, 5000000];
   companyTypeList = ['Sole Proprietorship', 'Partnership', 'Private Limited', 'Public Limited', 'Trust', 'Co-Operative'];
   sellTypeList = [{ name: 'Sell', value: 0 }, { name: 'Lease', value: 1 }];
-
+  userPage :any;
   processMstr:any;
   seller_processList:any=[];
+  isbizProfessional:boolean =false;
+  isnewProfessional :boolean =false;
   selectAction = 'List Business';
-
+  
+  agentEmailData : any;
+  agentMail:any;
+  otherDocs :boolean =false;
   // public uploader: FileUploader = new FileUploader({url: SECURL, itemAlias: 'SecondaryImage'});
+  public federalPlanUploader: FileUploader = new FileUploader({ url: federalURL, itemAlias: 'federalImage' });
+  public keyContractPlanUploader: FileUploader = new FileUploader({ url: keyContactURL, itemAlias: 'keyContractImage' });
+  public liabilitiesUploader: FileUploader = new FileUploader({ url: libilURL, itemAlias: 'libilsImage' });
+  public retirementPlanUploader: FileUploader = new FileUploader({ url:retireURL, itemAlias: 'retirePlanImage' });
   public licenseUploader: FileUploader = new FileUploader({ url: licenseURL, itemAlias: 'license' });
   public socialSecurityUploader: FileUploader = new FileUploader({ url: socialSecurityURL, itemAlias: 'socialSecurity' });
   public primaryImageUploader: FileUploader = new FileUploader({ url: URL, itemAlias: 'PrimaryImage' });
@@ -171,17 +206,19 @@ export class SellerRegisterComponent implements OnInit {
   constructor(private fb: FormBuilder, private user: NodeService,
     private process: ProcessService,private _sanitizer: DomSanitizer,
      private router: Router,public home: HomeNodeService,
-      public equip: EquipmentService,public sell: SellerService) {
+      public equip: EquipmentService,public sell: SellerService,private route :ActivatedRoute,
+      public mail :MailService
+    ) {
 
     this.businessRegisterData = this.fb.group({
       userId: [''],
       CompanyId: [''],
-      Name: [''],
-      agentName: [''],
-      agentEmail: [''],
-      homeAddress: [''],
-      agentContact: [''],
-      emailAddress: [''],
+      Name: ['',Validators.required],
+      agentName: ['',Validators.required],
+      agentEmail: ['',Validators.required],
+      homeAddress: ['',Validators.required],
+      agentContact: ['',Validators.required],
+      emailAddress: ['',Validators.required],
       faxNumber: [''],
       cellPhone: [''],
       homePhone: [''],
@@ -192,43 +229,40 @@ export class SellerRegisterComponent implements OnInit {
       birthPlace: [''],
       homeTelePhone: [''],
       Title: ['', Validators.required],
-      State: ['', Validators.required],
-      County: ['', Validators.required],
-      Price: ['', Validators.required],
-      Revenue: ['', Validators.required],
-      CashFlow: ['', Validators.required],
-      Description: ['', Validators.required],
-      Category: ['', Validators.required],
-      SubCategory: ['', Validators.required],
-      SubChildCategory: ['',],
-      CmpType: ['', Validators.required],
-      SellType: ['', Validators.required],
-      // CmpStatus:['',Validators.required],
-      EmpCount: ['', Validators.required],
-      YoutubeUrl: ['', [Validators.required, Validators.minLength(25)]],
+      State: ['',Validators.required],
+      County: ['',Validators.required],
+      Price: [''],
+      Revenue: ['',Validators.required],
+      CashFlow: ['',Validators.required],
+      Description: ['',Validators.required],
+      Category: ['',Validators.required],
+      SubCategory: ['',Validators.required],
+      SubChildCategory: [''],
+      CmpType: ['',Validators.required],
+      SellType: ['',Validators.required],    
+      EmpCount: [''],
+      YoutubeUrl: ['', Validators.required],
       Latitude: [''],
       Longitude: [''],
-      Address: [''],
-      ZipCode: ['', Validators.required],
-      BuildingType: ['',],
-      BuildingSubTypes: ['',],
-      BuildingSize: ['',],
+      Address: ['',Validators.required],
+      ZipCode: [''],
+      BuildingType: ['',Validators.required],
+      BuildingSubTypes: ['',Validators.required],
+      BuildingSize: [''],
       builtYear: [''],
       restRoom: [''],
       buildingZone: [''],
       buildingPark: [''],
-      totalAreaSize: ['',],
-      rentDetail: ['',],
+      totalAreaSize: [''],
+      rentDetail: [''],
       industryDetail: ['',],
-      zoningDetail: ['',],
-      annual_revenue: ['',],
-      cflow: ['',],
-      Expense: [''],
-      accountant: ['',],
-      attorney: ['',],
-      bussinessBrokerDetails: ['',],
+      zoningDetail: ['',],      
+      Expense: ['',Validators.required],
+      accountant: ['',Validators.required],
+      attorney: ['',Validators.required],
+      bussinessBrokerDetails: [''],
       saleAmount: [''],
-      whySell: [''],
+      whySell: ['',Validators.required],
       desiredTime: [''],
       fees: [''],
       escrow: [''],
@@ -244,7 +278,14 @@ export class SellerRegisterComponent implements OnInit {
   }
 
   ngOnInit() {
-
+    // this.route.queryParams
+    // .filter(params => params.debug)
+    // .subscribe(params => {
+    //   this.userPage = params.debug;
+    // });
+   
+  
+     
     if(sessionStorage.length){
       if(sessionStorage.getItem('Bizops_User')){      
         this.currentUser = JSON.parse(sessionStorage.getItem('Bizops_User'));
@@ -318,53 +359,409 @@ export class SellerRegisterComponent implements OnInit {
         alert('Server Error');
       });
 
+      this.primaryImageUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          console.log(file);
+          this.priImage = true;
+          const reader = new FileReader();
+          const imageFile: any = file.file.rawFile;
+          let list = {};
+          reader.onload = () => {
+            list = {
+              filename: imageFile.name,
+              filetype: imageFile.type,
+              value: (reader.result as string).split(',')[1]
+            };
+            this.primaryImage.push(list);
+          };
+          if (imageFile.size < this.maxFileSize) {
+            reader.readAsDataURL(imageFile);
+            this.isUpload = true;
+          } else {
+            alert("File size must be less that 1mb and more that 1kb!");
+          }
+        }
+      };
   
-    
-    this.primaryImageUploader.onAfterAddingFile = (file) => {
-      if (file) {
-        console.log(file);
-
-        const reader = new FileReader();
-        const imageFile: any = file.file.rawFile;
-        let list = {};
-        reader.onload = () => {
-          list = {
-            filename: imageFile.name,
-            filetype: imageFile.type,
-            value: (reader.result as string).split(',')[1]
+      this.SecondaryImageUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          this.secImage = true;
+          const reader = new FileReader();
+          const imageFile: any = file.file.rawFile;
+          let list = {};
+          reader.onload = () => {
+            list = {
+              filename: imageFile.name,
+              filetype: imageFile.type,
+              value: (reader.result as string).split(',')[1]
+            };
+            this.SecondaryImageData.push(list);
           };
-          this.primaryImage.push(list);
-        };
-        if (imageFile.size < this.maxFileSize) {
-          reader.readAsDataURL(imageFile);
-          this.isUpload = true;
-        } else {
-          alert("File size must be less that 1mb and more that 1kb!");
+          if (imageFile.size < this.maxFileSize) {
+            reader.readAsDataURL(imageFile);
+            this.isUpload = true;
+          } else {
+            alert("File size must be less that 1mb and more that 1kb!");
+          }
         }
-      }
-    };
-
-    this.SecondaryImageUploader.onAfterAddingFile = (file) => {
-      if (file) {
-        const reader = new FileReader();
-        const imageFile: any = file.file.rawFile;
-        let list = {};
-        reader.onload = () => {
-          list = {
-            filename: imageFile.name,
-            filetype: imageFile.type,
-           value : (reader.result as string).split(',')[1]
-          };
-          this.SecondaryImageData.push(list);
-        };
-        if (imageFile.size < this.maxFileSize) {
-          reader.readAsDataURL(imageFile);
-          this.isUpload = true;
-        } else {
-          alert("File size must be less that 1mb and more that 1kb!");
+      };
+      this.licenseUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#license");
+          this.liData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              this.licensePDF.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
         }
-      }
-    };    
+      };
+      this.socialSecurityUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#socialSecurity");
+          this.socData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              // this.pdfFiles.push(list);
+            }
+            if (img.size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+              this.isUpload = true;
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.premiseUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#preLeaseImage");
+          this.preData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.bankReportUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#bankPDF");
+          this.bankData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.licenseReportUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#licenseRep");
+          this.liReportData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+  
+      this.certificateUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#certificateRep");
+          this.certData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            console.log(img.files[0]);
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+  
+      this.reportsUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          this.reportsdata = true;
+          let img: any = document.querySelector("#reports");
+  
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.finStatementsUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#finState");
+          this.finsData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.insuranceUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#insurance");
+          this.InsData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.NDAUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#ndaImage");
+          this.ndaData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.liabilitiesUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#libilsImage");
+          this.liblsData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.retirementPlanUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#retirePlanImage");
+          this.retirePlanData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.keyContractPlanUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#keyContractImage");
+          this.keyContractData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+      this.federalPlanUploader.onAfterAddingFile = (file) => {
+        if (file) {
+          let img: any = document.querySelector("#federalImage");
+          this.federalPlanData = true;
+          if (typeof (FileReader) !== 'undefined') {
+            let reader = new FileReader();
+            let list = {};
+            reader.onload = (e: any) => {
+              this.pdfSrc = e.target.result;
+              this.showPdf = true;
+              list = {
+                filename: img.name,
+                filetype: img.type,
+                // value : reader.result.split(',')[1]
+              };
+              //  this.pdfFiles.push(list);
+            }
+            if (img.files[0].size < this.maxFileSize) {
+              reader.readAsArrayBuffer(img.files[0]);
+            } else {
+              alert("File size must be less that 1mb and more that 1kb!");
+            }
+          }
+        }
+      };
+       
+       
   }  
 
   beforeChange(event: NgbTabChangeEvent) {
@@ -457,6 +854,7 @@ export class SellerRegisterComponent implements OnInit {
   }
 
   selectProcess(value){
+
     if(this.seller_processList.length == 0){
       this.order_num = 1
     }
@@ -465,16 +863,10 @@ export class SellerRegisterComponent implements OnInit {
     }   
    // var process = this.processMstr.filter((item) => item.PROCESS_ID == value);
    var process = this.processMstr.filter((item) => item.STEP_NAME == value);
-
-    if(process[0].STEP_NAME=='List Business'){
-         process[0].STEP_NAME = 'Search Business'      
-    }
-
     var _obj={
       Order_num : this.order_num,
       Instruction : process[0].STEP_NAME,
     }
-
     this.seller_processList.push(_obj);
     console.log(this.seller_processList);
   }
@@ -488,12 +880,12 @@ export class SellerRegisterComponent implements OnInit {
  
   businessRegister() {
     this.submitted = true;
-    if (this.businessRegisterData.invalid) {
+    if (this.businessRegisterData.invalid) {   
       if ((this.f.Title.errors) || (this.f.YoutubeUrl.errors)) {
         this.tabs.select('tab-business');
       } else if ((this.f.Name.errors) || (this.f.emailAddress.errors)) {
         this.tabs.select('tab-personal');
-      } else if ((this.f.annual_revenue.errors) || (this.f.cflow.errors) || (this.f.Expense.errors)) {
+      } else if ((this.f.Revenue.errors) || (this.f.cflow.errors) || (this.f.Expense.errors)) {
         this.tabs.select('tab-finance');
       } else if ((this.f.BuildingSize.errors) || (this.f.BuildingType.errors) || (this.f.BuildingSubTypes.errors)) {
         this.tabs.select('tab-building');      
@@ -502,7 +894,7 @@ export class SellerRegisterComponent implements OnInit {
       } else if ((this.f.accountant.errors) || (this.f.attorney.errors) || (this.f.bussinessBrokerDetails.errors)) {
         this.tabs.select('tab-agent');
       }
-      return;
+      
     } else {
       this.businessRegisterData.patchValue({
         userId: this.currentUser.ID,
@@ -532,83 +924,122 @@ export class SellerRegisterComponent implements OnInit {
                 data=>{
                   var res = data;
                   if(res>0){                            
-                this.licenseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                this.licenseUploader.uploadAll();
-                this.licenseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                  if (response === 'Uploaded Sucessfully') {                    
-                    this.socialSecurityUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                    this.socialSecurityUploader.uploadAll();
-                  }                  
-                  this.socialSecurityUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                    if (response === 'Uploaded Sucessfully') {
-                      this.primaryImageUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID } });
-                      this.primaryImageUploader.uploadAll();
-                    }                 
-                    this.primaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                      if (response === 'Uploaded Sucessfully') {
-                        this.SecondaryImageUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID } });
-                        this.SecondaryImageUploader.uploadAll();
-                      }
-                      this.SecondaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        if (response === 'Uploaded Sucessfully') {
-                          this.licenseReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                          this.licenseReportUploader.uploadAll();
+                   
+                      this.primaryImageUploader.setOptions({
+                        additionalParameter: { Company_ID: this.CompanyID }
+                      });
+                      if (this.primaryImage.length > 0) {
+                        if (this.priImage) {
+                          this.primaryImageUploader.uploadAll();
+                          this.primaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            if (this.SecondaryImageData.length > 0) {
+                              if (this.secImage) {
+                                this.SecondaryImageUploader.setOptions({
+                                  additionalParameter: { Company_ID: this.CompanyID }
+                                });
+                                this.SecondaryImageUploader.uploadAll();
+                                this.SecondaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                                };
+                              }
+                            }
+                          };
                         }
-                        // this.licenseReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //   if (response === 'Uploaded Sucessfully') {
-                        //     this.premiseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        //     this.premiseUploader.uploadAll();
-                        //   }
-                        //   this.premiseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //     if (response === 'Uploaded Sucessfully') {
-                        //       this.bankReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        //       this.bankReportUploader.uploadAll();
-                        //     }
-                        //     this.bankReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //       if (response === 'Uploaded Sucessfully') {
-                        //         this.certificateUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        //         this.certificateUploader.uploadAll();
-                        //       }
-                        //       this.certificateUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //         if (response === 'Uploaded Sucessfully') {
-                        //           this.reportsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        //           this.reportsUploader.uploadAll();
-                        //         }
-                        //         this.reportsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //           if (response === 'Uploaded Sucessfully') {
-                        //             this.finStatementsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        //             this.finStatementsUploader.uploadAll();
-                        //           }
-                        //           this.finStatementsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //             if (response === 'Uploaded Sucessfully') {
-                        //               this.insuranceUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        //               this.insuranceUploader.uploadAll();
-                        //             }
-                        //             this.insuranceUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //               if (response === 'Uploaded Sucessfully') {
-                        //                 this.NDAUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        //                 this.NDAUploader.uploadAll();
-                        //               }
-                        //               this.NDAUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        //                 if (response === 'Uploaded Sucessfully') {
-                        //                   alert('Created Successfully !!!');
-                        //                   this.businessRegisterData.reset();
-                        //                   this.router.navigate(['/addedlist']);
-                        //                   this.clearFile();
-                        //                 }
-                        //               };
-                        //             };
-                        //           };
-                        //         };
-                        //       };
-                        //     };
-                        //   };
-                        // };
+                      }                     
+                      if (this.licenseData) {
+                        this.licenseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.licenseUploader.uploadAll();
+                        this.licenseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.socData) {
+                        this.socialSecurityUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.socialSecurityUploader.uploadAll();
+                        this.socialSecurityUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.liReportData) {
+                        this.licenseReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.licenseReportUploader.uploadAll();
+                        // }                                                                      
+                        this.licenseReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.preData) {
+                        this.premiseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.premiseUploader.uploadAll();
+                        this.premiseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.bankData) {
+                        this.bankReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.bankReportUploader.uploadAll();
+                        this.bankReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.certData) {
+                        this.certificateUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.certificateUploader.uploadAll();
+                        this.certificateUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
                       };
-                    };
-                  };
-                };             
-            }
+                      if (this.reportsdata) {
+                        this.reportsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.reportsUploader.uploadAll();
+                        this.reportsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.finsData) {
+                        this.finStatementsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.finStatementsUploader.uploadAll();
+                        this.finStatementsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.InsData) {
+                        this.insuranceUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.insuranceUploader.uploadAll();
+                        this.insuranceUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.ndaData) {
+                        this.NDAUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.NDAUploader.uploadAll();
+                        this.NDAUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.liblsData) {
+                        this.liabilitiesUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.liabilitiesUploader.uploadAll();
+                        this.liabilitiesUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.retirePlanData) {
+                        this.retirementPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.retirementPlanUploader.uploadAll();
+                        this.retirementPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.retirePlanData) {
+                        this.retirementPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.retirementPlanUploader.uploadAll();
+                        this.retirementPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.keyContractData) {
+                        this.keyContractPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.keyContractPlanUploader.uploadAll();
+                        this.keyContractPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      if (this.federalPlanData) {
+                        this.federalPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                        this.federalPlanUploader.uploadAll();
+                        this.federalPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                        };
+                      }
+                      alert('Created Successfully !!!');                  
+                      this.router.navigate(['/list/addedlist']);                      
+                    }    
+           
           });
             },
             error => {
@@ -684,5 +1115,66 @@ export class SellerRegisterComponent implements OnInit {
   }
   clearbankReportFile() {
     this.bankRepData = [];
+  }
+  personalInfoNext(){
+    this.tabs.select('tab-business');
+  }
+  bussinessInfoNext(){    
+    this.tabs.select('tab-finance');
+  }
+  financialInfoNext(){
+    this.tabs.select('tab-building');
+  }
+  buidingInfoNext(){
+    this.tabs.select('tab-premises');
+  }
+  premisesInfoNext(){
+    this.tabs.select('tab-equipment');
+  }
+  equipmentInfoNext(){
+    this.tabs.select('tab-agent');
+  }
+  agentInfoNext(){
+    this.tabs.select('tab-terms');
+  }
+  TermsInfoNext(){
+    this.tabs.select('tab-services');
+  }
+  ServicesInfoNext(){
+    this.tabs.select('tab-process_overview');
+  }
+  ProcessOverviewNext(){   
+    this.tabs.select('tab-other-documents');
+  }
+  otherDocsNext(){
+    this.saveProperty =true;
+  } 
+  professionalsType(value){
+    console.log(value);
+    if(value == 'Bizops Professionals'){
+      this.isbizProfessional = true;
+      this.isnewProfessional = false;
+    }else{
+      this.isnewProfessional = true;
+      this.isbizProfessional = false;
+    }
+  }
+  bizProfessionals(){
+    this.router.navigate(['/operate/hire'],{
+      queryParams: {selectProf:'Professionals'}});
+  }
+  createnewProfessionals(){
+    this.isSendMail = true;
+  }
+  sendEmail(){  
+    console.log(this.agentEmailData);
+      this.mail.requestProfessionalMail(this.agentEmailData).subscribe(data=>{
+      let Data = data;
+      console.log(Data);
+      if(Data){
+        alert("Successfully Sent");
+      }
+    
+    });
   }
 }

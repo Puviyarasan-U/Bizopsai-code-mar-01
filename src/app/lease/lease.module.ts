@@ -8,11 +8,13 @@ import { SharedModule } from '../shared/shared.module';
 import { LeaseRoutingModule } from './lease-routing.module';
 import { LeaseComponent } from './lease/lease.component';
 import { LeaseDetailComponent } from './lease-detail/lease-detail.component';
+import { TenantListComponent } from './tenant-list/tenant-list.component';
+import { LandlordListComponent } from './landlord-list/landlord-list.component';
 
 @NgModule({
   declarations: [
     LeaseComponent, 
-    LeaseDetailComponent
+    LeaseDetailComponent, TenantListComponent, LandlordListComponent
   ],
   imports: [
     CommonModule,

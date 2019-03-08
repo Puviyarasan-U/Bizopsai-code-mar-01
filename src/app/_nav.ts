@@ -145,3 +145,60 @@ export const adminNav =[
   },
  
 ];
+
+export const LandlordNav =[
+  // {
+  //   name: 'Process Overview',
+  //   url: '/list/process',
+  //   icon: 'icon-layers',
+  // },
+  {
+    name: 'Transaction Map',
+    url: '/lease-transaction',
+    icon: 'icon-map', 
+  },
+  {
+    name: 'Services ',
+    url: '/lease-transaction/lease-service',
+    icon: 'icon-people',
+  },
+  {
+    name: 'Landlord List',
+    url: '/lease/landlord-list',
+    icon: 'icon-list',
+  },
+ 
+  {
+    name: 'Data Room ',
+    url: '/data',
+    icon: 'icon-grid',
+  },
+];
+
+export const TenantNav =[
+  // {
+  //   name: 'Process Overview',
+  //   url: '/list/process',
+  //   icon: 'icon-layers',
+  // },
+  {
+    name: 'Transaction Map',
+    url: '/lease-transaction',
+    icon: 'icon-map', 
+  },
+  {
+    name: 'Services ',
+    url: '/lease-transaction/lease-service',
+    icon: 'icon-people',
+  },
+  {
+    name: 'Saved List',
+    url: '/lease/landlord-list',
+    icon: 'icon-list',
+  }, 
+  {
+    name: 'Data Room ',
+    url: '/data',
+    icon: 'icon-grid',
+  },
+];

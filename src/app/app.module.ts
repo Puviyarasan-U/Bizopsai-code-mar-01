@@ -58,6 +58,7 @@ import { RegisterModule } from './register/register.module';
 import { LeaseTransactionModule } from './lease-transaction/lease-transaction.module';
 
 
+
 @NgModule({
   imports: [   
     SharedModule,
@@ -98,7 +99,7 @@ import { LeaseTransactionModule } from './lease-transaction/lease-transaction.mo
     LoginComponent,
     RegisterComponent,
     ProfessionalRegisterComponent,      
-    LandingComponent
+    LandingComponent, 
   ],
   providers: [{
     provide: LocationStrategy,

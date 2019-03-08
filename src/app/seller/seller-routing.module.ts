@@ -1,9 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-
 import { SellerRegisterComponent } from './seller-register/seller-register.component';
 import { SellerEditComponent } from './seller-edit/seller-edit.component';
-
 export const routes: Routes = [
     {
         path: 'sell',

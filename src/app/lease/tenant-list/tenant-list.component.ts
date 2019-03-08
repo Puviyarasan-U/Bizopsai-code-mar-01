@@ -1,13 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { NodeService } from '../../services/Nodeservice';
 import { Router } from '@angular/router';
 
+import { NodeService } from '../../services/Nodeservice';
+import { LandlordService } from '../../services/landlord.service';
+
+
 @Component({
-  selector: 'app-saved-list',
-  templateUrl: './saved-list.component.html',
-  styleUrls: ['./saved-list.component.scss']
+  selector: 'app-tenant-list',
+  templateUrl: './tenant-list.component.html',
+  styleUrls: ['./tenant-list.component.scss']
 })
-export class SavedListComponent implements OnInit {
+export class TenantListComponent implements OnInit {
+
   p:any;
   Data: any;
   list: any;
@@ -15,7 +19,7 @@ export class SavedListComponent implements OnInit {
   user_id: any;
   isList = true;
 
-  constructor( private user: NodeService,public router: Router,) {  }
+  constructor( private user: NodeService, public router: Router, private landlord:LandlordService) {  }
 
   ngOnInit() {
 
@@ -27,7 +31,7 @@ export class SavedListComponent implements OnInit {
       }        
     }
 
-    this.user.getSavedList(this.user_id).subscribe(
+    this.landlord.getTenantLeaseList(this.user_id).subscribe(
       data => {
       
             this.Data = data;
@@ -48,7 +52,7 @@ export class SavedListComponent implements OnInit {
   }
   
   detail(value) {
-    this.router.navigate(['/home/detail'], { queryParams: { com_id: value } });
+    this.router.navigate(['/lease/lease-detail'], { queryParams: { biz_id: value } });
   }
 
   remove(value){

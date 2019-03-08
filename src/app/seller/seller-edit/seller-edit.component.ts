@@ -9,9 +9,9 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { HomeNodeService } from '../../services/HomeNodeService';
 import { EquipmentService } from '../../services/equipment.service';
 import { ProcessService } from '../../services/process.service';
+import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
 
-
-const URL = 'http://localhost:3010/api/upload';
+const URL = 'http://localhost:3010/api/upload/edit';
 const SECURL = 'http://localhost:3010/api/upload/multi';
 const licenseURL = 'http://localhost:3010/api/upload/license';
 const socialSecurityURL = 'http://localhost:3010/api/upload/social';
@@ -24,6 +24,11 @@ const financialStatementsURL = 'http://localhost:3010/api/upload/finsRep';
 const InsuranceURL = 'http://localhost:3010/api/upload/insuranceRep';
 const ndaURL = 'http://localhost:3010/api/upload/ndaData';
 
+const libilURL = 'http://localhost:3010/api/upload/libil';
+const retireURL = 'http://localhost:3010/api/upload/retirePlan';
+const keyContactURL = 'http://localhost:3010/api/upload/keyConract';
+const federalURL = 'http://localhost:3010/api/upload/federal';
+
 @Component({
   selector: 'app-seller-edit',
   templateUrl: './seller-edit.component.html',
@@ -33,13 +38,32 @@ export class SellerEditComponent implements OnInit {
 
   @ViewChild('fileInput') fileInput: ElementRef;
   @ViewChild('closeLogin') closeLogin: ElementRef;
+  @ViewChild('tab') public tabs: NgbTabset;
+  licensePdfSrc: string;
+  socPdfSrc :string;
+  premisePdfSrc :string;
+  bankPdfSrc :string;
+  licenseReportPdfSrc :string;
+  certPdfSrc :string;
+  reportsPdfSrc :string;
+  finsPdfSrc:string;
+  insPdfSrc :string;
+  ndaPdfSrc:string;
+  showLicensePdf: boolean = false;
+  showSocPdf: boolean = false;
+  showBankPdf:boolean = false;
+  showLicenseReportPdf :boolean =false;
+  showPremisePdf:boolean =false;
+  showCertPdf:boolean =false;
+  showReportsPdf:boolean = false;
+  showFinsPdf:boolean =false;
+  showInsPdf :boolean =false;
   SecondaryImageData: any = [];
+  saveProperty: boolean = false;
   ser_name: any;
   licensePDF: any = [];
-  maxFileSize = 1048576;
-  showPdf: boolean = false;
-  page: number = 1;
-  pdfSrc: string;
+  maxFileSize = 1048576; 
+  page: number = 1; 
   id: any;
   place: any;
   center: any;
@@ -126,6 +150,15 @@ export class SellerEditComponent implements OnInit {
   ndaData: boolean = false;
   priImage: boolean = false;
   secImage: boolean = false;
+  retirePlanData:boolean =false;
+  keyContractData:boolean =false;
+  federalPlanData:boolean =false;
+  liblsData:boolean =false;
+  showLibilsPdf:boolean=false;
+  showRetirePlanPdf :boolean =false;
+  showKeyContractPdf :boolean =false;
+  showCompliancePdf :boolean =false;
+  userData:any=[];
   sellTypeList = [{ name: 'Sell', value: 0 }, { name: 'Lease', value: 1 }]
   companyStatus = ['Running', 'Dormant'];
   employeesCount = ['1-10', '11-25', '26-50', '51-100', '101-200', '200+']
@@ -134,7 +167,10 @@ export class SellerEditComponent implements OnInit {
   //public uploader: FileUploader = new FileUploader({url: SECURL, itemAlias: 'SecondaryImage'});
 
   //public uploader: FileUploader = new FileUploader({url: SECURL, itemAlias: 'SecondaryImage'});
-
+  public federalPlanUploader: FileUploader = new FileUploader({ url: federalURL, itemAlias: 'federalImage' });
+  public keyContractPlanUploader: FileUploader = new FileUploader({ url: keyContactURL, itemAlias: 'keyContractImage' });
+  public liabilitiesUploader: FileUploader = new FileUploader({ url: libilURL, itemAlias: 'libilsImage' });
+  public retirementPlanUploader: FileUploader = new FileUploader({ url:retireURL, itemAlias: 'retirePlanImage' });
   public licenseUploader: FileUploader = new FileUploader({ url: licenseURL, itemAlias: 'license' });
   public socialSecurityUploader: FileUploader = new FileUploader({ url: socialSecurityURL, itemAlias: 'socialSecurity' });
   public primaryImageUploader: FileUploader = new FileUploader({ url: URL, itemAlias: 'PrimaryImage' });
@@ -150,11 +186,11 @@ export class SellerEditComponent implements OnInit {
   processMstr: any;
   selectAction: any;
   order_num: any;
-  seller_processList =[];
+  seller_processList = [];
   user_id: any;
-  constructor(private fb: FormBuilder, private user: NodeService, 
+  constructor(private fb: FormBuilder, private user: NodeService,
     private _sanitizer: DomSanitizer, private process: ProcessService,
-    private router: Router, private route: ActivatedRoute, 
+    private router: Router, private route: ActivatedRoute,
     public home: HomeNodeService, public equip: EquipmentService) {
 
     this.route.queryParams
@@ -164,17 +200,16 @@ export class SellerEditComponent implements OnInit {
         this.id = params.com_id;
       });
 
-      
+
     this.businessRegisterData = this.fb.group({
-  
       userId: [''],
       CompanyId: [''],
-      Name: [''],
-      agentName: [''],
-      agentEmail: [''],
-      homeAddress: [''],
-      agentContact: [''],
-      emailAddress: [''],
+      Name: ['', Validators.required],
+      agentName: ['', Validators.required],
+      agentEmail: ['', Validators.required],
+      homeAddress: ['', Validators.required],
+      agentContact: ['', Validators.required],
+      emailAddress: ['', Validators.required],
       faxNumber: [''],
       cellPhone: [''],
       homePhone: [''],
@@ -187,48 +222,44 @@ export class SellerEditComponent implements OnInit {
       Title: ['', Validators.required],
       State: ['', Validators.required],
       County: ['', Validators.required],
-      Price: ['', Validators.required],
+      Price: [''],
       Revenue: ['', Validators.required],
       CashFlow: ['', Validators.required],
       Description: ['', Validators.required],
       Category: ['', Validators.required],
       SubCategory: ['', Validators.required],
-      SubChildCategory: ['',],
+      SubChildCategory: [''],
       CmpType: ['', Validators.required],
       SellType: ['', Validators.required],
-      // CmpStatus:['',Validators.required],
-      EmpCount: ['', Validators.required],
-      YoutubeUrl: ['', [Validators.required, Validators.minLength(25)]],
+      EmpCount: [''],
+      YoutubeUrl: ['', Validators.required],
       Latitude: [''],
       Longitude: [''],
-      Address: [''],
-      ZipCode: ['', Validators.required],
-      BuildingType: ['',],
-      BuildingSubTypes: ['',],
-      BuildingSize: ['',],
+      Address: ['', Validators.required],
+      ZipCode: [''],
+      BuildingType: ['', Validators.required],
+      BuildingSubTypes: ['', Validators.required],
+      BuildingSize: [''],
       builtYear: [''],
       restRoom: [''],
       buildingZone: [''],
       buildingPark: [''],
-      totalAreaSize: ['',],
-      rentDetail: ['',],
+      totalAreaSize: [''],
+      rentDetail: [''],
       industryDetail: ['',],
       zoningDetail: ['',],
-      annual_revenue: ['',],
-      cflow: ['',],
-      Expense: [''],
-      accountant: ['',],
-      attorney: ['',],
-      bussinessBrokerDetails: ['',],
+      Expense: ['', Validators.required],
+      accountant: ['', Validators.required],
+      attorney: ['', Validators.required],
+      bussinessBrokerDetails: [''],
       saleAmount: [''],
-      whySell: [''],
+      whySell: ['', Validators.required],
       desiredTime: [''],
       fees: [''],
       escrow: [''],
       legal: [''],
       accounting: [''],
       valuation: ['']
-
     });
     this.EquipmentRegisterData = this.fb.group({
       equipmentName: [''],
@@ -241,22 +272,24 @@ export class SellerEditComponent implements OnInit {
   get add() { return this.EquipmentRegisterData.controls; }
   ngOnInit() {
 
-    if(sessionStorage.length){
-      if(sessionStorage.getItem('Bizops_User')){      
+    if (sessionStorage.length) {
+      if (sessionStorage.getItem('Bizops_User')) {
         this.currentUser = JSON.parse(sessionStorage.getItem('Bizops_User'));
-        this.user_name = this.currentUser.USER_FIRSTNAME;       
+        this.user_name = this.currentUser.USER_FIRSTNAME;
         this.user_id = this.currentUser.ID;
-       // this.isUser = true;       
-      }        
+        // this.isUser = true;       
+      }
     }
 
 
-      this.user.getBizbyid(this.id).subscribe(
-        data => {
+    this.user.getBizbyid(this.id).subscribe(
+      data => {
         this.Data = data;
         this.list = this.Data;
         console.log(this.list);
         const load = this.list[0];
+        this.userData.push(this.list[0]);
+        console.log(this.userData );
         this.Title = load.TITLE;
         this.curCategory = load.CATEGORY;
         this.curSubCategory = load.SUBCATEGORY;
@@ -359,27 +392,27 @@ export class SellerEditComponent implements OnInit {
                             this.home.getCountyList().subscribe(
                               data => {
                                 this.countyList = data;
-                                this.home.getProcessMstr().subscribe(                                     
+                                this.home.getProcessMstr().subscribe(
                                   processData => {
                                     this.processMstr = processData;
 
-                                this.equip.getEquip(this.id).subscribe(
-                                  data => {
-                                    this.Equip = data;
-                                    this.equip_data = this.Equip;
-                                    for (let i = 0; i < this.equip_data.length; i++) {
-                                      const equipList = {
-                                        id: this.equip_data[i].ID,
-                                        name: this.equip_data[i].EQUIPMENT_NAME,
-                                        value: this.equip_data[i].NO_OF_EQUIPMENTS
-                                      }
-                                      this.Equipment_Details.push(equipList);
-                                    }
+                                    this.equip.getEquip(this.id).subscribe(
+                                      data => {
+                                        this.Equip = data;
+                                        this.equip_data = this.Equip;
+                                        for (let i = 0; i < this.equip_data.length; i++) {
+                                          const equipList = {
+                                            id: this.equip_data[i].ID,
+                                            name: this.equip_data[i].EQUIPMENT_NAME,
+                                            value: this.equip_data[i].NO_OF_EQUIPMENTS
+                                          }
+                                          this.Equipment_Details.push(equipList);
+                                        }
+
+                                      });
 
                                   });
-
                               });
-                            });
                           });
                       });
                   });
@@ -391,7 +424,7 @@ export class SellerEditComponent implements OnInit {
         alert('Server Error');
       });
 
-   
+
     this.licenseUploader.onAfterAddingFile = (file) => {
       if (file) {
         let img: any = document.querySelector("#license");
@@ -400,8 +433,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.licensePdfSrc = e.target.result;
+            this.showLicensePdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -425,8 +458,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.socPdfSrc = e.target.result;
+            this.showSocPdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -500,8 +533,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.premisePdfSrc = e.target.result;
+            this.showPremisePdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -525,8 +558,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.bankPdfSrc = e.target.result;
+            this.showBankPdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -550,8 +583,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.licenseReportPdfSrc = e.target.result;
+            this.showLicenseReportPdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -576,8 +609,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.certPdfSrc = e.target.result;
+            this.showCertPdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -604,8 +637,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.reportsPdfSrc = e.target.result;
+            this.showReportsPdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -629,8 +662,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.finsPdfSrc = e.target.result;
+            this.showFinsPdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -654,8 +687,8 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.insPdfSrc = e.target.result;
+            this.showInsPdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -679,8 +712,108 @@ export class SellerEditComponent implements OnInit {
           let reader = new FileReader();
           let list = {};
           reader.onload = (e: any) => {
-            this.pdfSrc = e.target.result;
-            this.showPdf = true;
+            this.ndaPdfSrc = e.target.result;
+            // this.showNDAPdf = true;
+            list = {
+              filename: img.name,
+              filetype: img.type,
+              // value : reader.result.split(',')[1]
+            };
+            //  this.pdfFiles.push(list);
+          }
+          if (img.files[0].size < this.maxFileSize) {
+            reader.readAsArrayBuffer(img.files[0]);
+          } else {
+            alert("File size must be less that 1mb and more that 1kb!");
+          }
+        }
+      }
+    };
+    this.liabilitiesUploader.onAfterAddingFile = (file) => {
+      if (file) {
+        let img: any = document.querySelector("#libilsImage");
+        this.liblsData = true;
+        if (typeof (FileReader) !== 'undefined') {
+          let reader = new FileReader();
+          let list = {};
+          reader.onload = (e: any) => {
+            // this.libilsPdfSrc = e.target.result;
+            this.showLibilsPdf = true;
+            list = {
+              filename: img.name,
+              filetype: img.type,
+              // value : reader.result.split(',')[1]
+            };
+            //  this.pdfFiles.push(list);
+          }
+          if (img.files[0].size < this.maxFileSize) {
+            reader.readAsArrayBuffer(img.files[0]);
+          } else {
+            alert("File size must be less that 1mb and more that 1kb!");
+          }
+        }
+      }
+    };
+    this.retirementPlanUploader.onAfterAddingFile = (file) => {
+      if (file) {
+        let img: any = document.querySelector("#retirePlanImage");
+        this.retirePlanData = true;
+        if (typeof (FileReader) !== 'undefined') {
+          let reader = new FileReader();
+          let list = {};
+          reader.onload = (e: any) => {
+            // this.pdfSrc = e.target.result;
+            this.showRetirePlanPdf = true;
+            list = {
+              filename: img.name,
+              filetype: img.type,
+              // value : reader.result.split(',')[1]
+            };
+            //  this.pdfFiles.push(list);
+          }
+          if (img.files[0].size < this.maxFileSize) {
+            reader.readAsArrayBuffer(img.files[0]);
+          } else {
+            alert("File size must be less that 1mb and more that 1kb!");
+          }
+        }
+      }
+    };
+    this.keyContractPlanUploader.onAfterAddingFile = (file) => {
+      if (file) {
+        let img: any = document.querySelector("#keyContractImage");
+        this.keyContractData = true;
+        if (typeof (FileReader) !== 'undefined') {
+          let reader = new FileReader();
+          let list = {};
+          reader.onload = (e: any) => {
+            // this.pdfSrc = e.target.result;
+            this.showKeyContractPdf = true;
+            list = {
+              filename: img.name,
+              filetype: img.type,
+              // value : reader.result.split(',')[1]
+            };
+            //  this.pdfFiles.push(list);
+          }
+          if (img.files[0].size < this.maxFileSize) {
+            reader.readAsArrayBuffer(img.files[0]);
+          } else {
+            alert("File size must be less that 1mb and more that 1kb!");
+          }
+        }
+      }
+    };
+    this.federalPlanUploader.onAfterAddingFile = (file) => {
+      if (file) {
+        let img: any = document.querySelector("#federalImage");
+        this.federalPlanData = true;
+        if (typeof (FileReader) !== 'undefined') {
+          let reader = new FileReader();
+          let list = {};
+          reader.onload = (e: any) => {
+            // this.pdfSrc = e.target.result;
+            this.showCompliancePdf = true;
             list = {
               filename: img.name,
               filetype: img.type,
@@ -730,23 +863,23 @@ export class SellerEditComponent implements OnInit {
     this.primaryImage = [];
   }
 
-  processAction(value){
+  processAction(value) {
     console.log(value);
     this.selectAction = value;
   }
 
-  selectProcess(value){
-    if(this.seller_processList.length == 0){
+  selectProcess(value) {
+    if (this.seller_processList.length == 0) {
       this.order_num = 1
     }
-    else{
+    else {
       this.order_num = this.order_num + 1;
-    }   
-   // var process = this.processMstr.filter((item) => item.PROCESS_ID == value);
-   var process = this.processMstr.filter((item) => item.STEP_NAME == value);
-    var _obj={
-      Order_num : this.order_num,
-      Instruction : process[0].STEP_NAME,
+    }
+    // var process = this.processMstr.filter((item) => item.PROCESS_ID == value);
+    var process = this.processMstr.filter((item) => item.STEP_NAME == value);
+    var _obj = {
+      Order_num: this.order_num,
+      Instruction: process[0].STEP_NAME,
     }
     this.seller_processList.push(_obj);
     console.log(this.seller_processList);
@@ -770,8 +903,10 @@ export class SellerEditComponent implements OnInit {
   businessRegister() {
     this.submitted = true;
     if (this.businessRegisterData.invalid) {
-      return;
-    } else {
+      return
+
+    }
+    else {
       this.businessRegisterData.patchValue({
         userId: this.currentUser.ID,
         CompanyId: this.id,
@@ -796,122 +931,150 @@ export class SellerEditComponent implements OnInit {
                 //     this.Data = data;
                 //     if (this.Data) {
 
-                      this.process.deleteProcess(this.CompanyID).subscribe(data=>{
+                this.process.deleteProcess(this.CompanyID).subscribe(data => {
 
+                  var res = data;
+                  if (res > 0) {
+
+
+                    var processList = {
+                      companyId: this.CompanyID,
+                      UserId: this.user_id,
+                      list: this.seller_processList
+                    }
+                    this.process.createBusinessProcess(processList).subscribe(
+                      data => {
                         var res = data;
-                        if(res>0){
+                        if (res > 0) {
 
-                      
-                      var processList = {
-                        companyId : this.CompanyID,
-                        UserId : this.user_id,               
-                        list : this.seller_processList
-                      }
-                      this.process.createBusinessProcess(processList).subscribe(
-                        data=>{
-                          var res = data;
-                          if(res>0){ 
-
-                      this.primaryImageUploader.setOptions({
-                        additionalParameter: { Company_ID: this.CompanyID }
-                      });
-                      if (this.primaryImage.length > 0) {
-                        if (this.priImage) {
-                          this.primaryImageUploader.uploadAll();
-                          this.primaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                          };
-                        }
-                      }
-                      if (this.SecondaryImageData.length > 0) {
-                        this.user.deleteSecImages(this.id).subscribe(
-                          data => {
-                            this.Data = data;
-                            if (this.secImage) {
-                              this.SecondaryImageUploader.setOptions({
-                                additionalParameter: { Company_ID: this.CompanyID }
-                              });
-                              this.SecondaryImageUploader.uploadAll();
-                              this.SecondaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                          this.primaryImageUploader.setOptions({
+                            additionalParameter: { Company_ID: this.CompanyID }
+                          });
+                          if (this.primaryImage.length > 0) {
+                            if (this.priImage) {
+                              this.primaryImageUploader.uploadAll();
+                              this.primaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                                if (this.SecondaryImageData.length > 0) {
+                                  this.user.deleteSecImages(this.id).subscribe(
+                                    data => {
+                                      this.Data = data;
+                                      if (this.secImage) {
+                                        this.SecondaryImageUploader.setOptions({
+                                          additionalParameter: { Company_ID: this.CompanyID }
+                                        });
+                                        this.SecondaryImageUploader.uploadAll();
+                                        this.SecondaryImageUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                                        };
+                                      }
+                                    });
+                                }
                               };
                             }
-                          });
-                      }
-                      if (this.licenseData) {
-                        this.licenseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.licenseUploader.uploadAll();
-                        this.licenseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        };
-                      }
-                      if (this.socData) {
-                        this.socialSecurityUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                       this.socialSecurityUploader.uploadAll();                  
-                       this.socialSecurityUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                         };
-                      }
-                      if (this.licenseReportData) {
-                        this.licenseReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.licenseReportUploader.uploadAll();
-                        // }                                                                      
-                        this.licenseReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {                         
-                        };
-                      }
-                      if (this.preData) {
-                        this.premiseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.premiseUploader.uploadAll();                        
-                        this.premiseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {                        
-                        };
-                      }
-                      if (this.bankData) {
-                        this.bankReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.bankReportUploader.uploadAll();    
-                        this.bankReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        };
-                      }
-                      if (this.certData) {                       
-                        this.certificateUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.certificateUploader.uploadAll();                       
-                        this.certificateUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {                         
-                        };
-                      };
-                      if (this.reportsdata) {
-                        this.reportsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.reportsUploader.uploadAll();                      
-                        this.reportsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        };
-                      }
-                      if (this.finsData) {
-                        this.finStatementsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.finStatementsUploader.uploadAll();                      
-                        this.finStatementsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
-                        };
-                      }
-                      if (this.InsData) {                      
-                        this.insuranceUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.insuranceUploader.uploadAll();                       
-                        this.insuranceUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {                       
-                        };
-                      }
-                      if (this.ndaData) {
-                        this.NDAUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
-                        this.NDAUploader.uploadAll();                      
-                        this.NDAUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {                          
-                        };
-                      }
-                      alert('Created Successfully !!!');
-                      this.businessRegisterData.reset();
-                      this.router.navigate(['/list/addedlist']);
-                      this.clearFile();
-                    }
-                  },
-                  error => {
-                    alert('Server Error');
-                    console.log(error);
-                  });
-                }
-              });
+                          }
 
-              //   }
-              // });
+                          if (this.licenseData) {
+                            this.licenseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.licenseUploader.uploadAll();
+                            this.licenseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.socData) {
+                            this.socialSecurityUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.socialSecurityUploader.uploadAll();
+                            this.socialSecurityUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.licenseReportData) {
+                            this.licenseReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.licenseReportUploader.uploadAll();
+                            // }                                                                      
+                            this.licenseReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.preData) {
+                            this.premiseUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.premiseUploader.uploadAll();
+                            this.premiseUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.bankData) {
+                            this.bankReportUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.bankReportUploader.uploadAll();
+                            this.bankReportUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.certData) {
+                            this.certificateUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.certificateUploader.uploadAll();
+                            this.certificateUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          };
+                          if (this.reportsdata) {
+                            this.reportsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.reportsUploader.uploadAll();
+                            this.reportsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.finsData) {
+                            this.finStatementsUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.finStatementsUploader.uploadAll();
+                            this.finStatementsUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.InsData) {
+                            this.insuranceUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.insuranceUploader.uploadAll();
+                            this.insuranceUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.ndaData) {
+                            this.NDAUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.NDAUploader.uploadAll();
+                            this.NDAUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.liblsData) {
+                            this.liabilitiesUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.liabilitiesUploader.uploadAll();
+                            this.liabilitiesUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.retirePlanData) {
+                            this.retirementPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.retirementPlanUploader.uploadAll();
+                            this.retirementPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.retirePlanData) {
+                            this.retirementPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.retirementPlanUploader.uploadAll();
+                            this.retirementPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.keyContractData) {
+                            this.keyContractPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.keyContractPlanUploader.uploadAll();
+                            this.keyContractPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          if (this.federalPlanData) {
+                            this.federalPlanUploader.setOptions({ additionalParameter: { Company_ID: this.CompanyID, USERNAME: this.user_name } });
+                            this.federalPlanUploader.uploadAll();
+                            this.federalPlanUploader.onCompleteItem = (item: any, response: any, status: any, headers: any) => {
+                            };
+                          }
+                          alert('Created Successfully !!!');
+                          this.router.navigate(['/list/addedlist']);
+                        }
+                      },
+                      error => {
+                        alert('Server Error');
+                        console.log(error);
+                      });
+                  }
+                });
+
+
               }
             });
         },
@@ -962,5 +1125,77 @@ export class SellerEditComponent implements OnInit {
     });
     this.EquipName = this.editEquipment_Details[0].name;
     this.Equip_Nos = this.editEquipment_Details[0].value;
+  }
+  personalInfoNext() {
+    this.tabs.select('tab-business');
+  }
+  bussinessInfoNext() {
+    this.tabs.select('tab-finance');
+  }
+  financialInfoNext() {
+    this.tabs.select('tab-building');
+  }
+  buidingInfoNext() {
+    this.tabs.select('tab-premises');
+  }
+  premisesInfoNext() {
+    this.tabs.select('tab-equipment');
+  }
+  equipmentInfoNext() {
+    this.tabs.select('tab-agent');
+  }
+  agentInfoNext() {
+    this.tabs.select('tab-terms');
+  }
+  TermsInfoNext() {
+    this.tabs.select('tab-services');
+  }
+  ServicesInfoNext() {
+    this.tabs.select('tab-process_overview');
+  }
+  ProcessOverviewNext(){   
+    this.tabs.select('tab-other-documents');
+  }
+  otherDocsNext(){
+    this.saveProperty =true;
+  }
+  viewLicense(){
+    this.showLicensePdf =true;
+  }
+  viewSoc(){
+    this.showSocPdf = true;
+  }
+  viewBankData(){
+    this.showBankPdf = true;
+  }
+  viewLicenseReport(){
+    this.showLicenseReportPdf = true;
+  }
+  viewCertData(){
+    this.showCertPdf = true;
+  }
+  viewReport(){
+    this.showReportsPdf = true;
+  }
+  viewFinancialData(){
+    this.showFinsPdf = true;
+  }
+  viewInsData(){
+    this.showInsPdf = true;
+  }
+  viewPremiseData(){
+    this.showPremisePdf = true;
+  }
+  viewLibilsData(){
+    this.showLibilsPdf = true;
+  }
+  viewRetirePlandata(){
+    this.showRetirePlanPdf = true;
+  }
+  viewKeyContractData(){
+    this.showKeyContractPdf = true;
+  }
+  viewComplianceData(){
+    this.showCompliancePdf = true;
   }
 }

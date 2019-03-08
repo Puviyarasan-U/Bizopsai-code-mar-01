@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { NgbTabChangeEvent } from '@ng-bootstrap/ng-bootstrap';
 import { NgbTabset } from '@ng-bootstrap/ng-bootstrap';
+import { ActivatedRoute } from '@angular/router';
 
 import { LandlordService } from '../../services/landlord.service';
 
@@ -21,10 +22,13 @@ export class LandlordRegisterComponent implements OnInit {
   user_name: any;
   user_id: any;
 
+  edit_id: any;
+
   isFirstTime = true;
   userLeaseList:any;
+  isRedirected = false;
   
-  constructor(private fb: FormBuilder,private landlord:LandlordService) { }
+  constructor(private fb: FormBuilder,private landlord:LandlordService,  private route: ActivatedRoute,) { }
 
   ngOnInit() {
     if (sessionStorage.length) {
@@ -34,6 +38,15 @@ export class LandlordRegisterComponent implements OnInit {
         this.user_id = userdata.ID;      
       }
     } 
+    this.route.queryParams
+    .filter(params => params.biz_id)
+    .subscribe(params => {
+      console.log(params);
+      this.isRedirected = true;
+      //this.loadLeaseData(params.biz_id)
+       this.edit_id = params.biz_id;
+    });
+
 
     this.checkoutForm = this.fb.group({
       personal: this.fb.group({
@@ -92,11 +105,15 @@ export class LandlordRegisterComponent implements OnInit {
               
           } else {
             this.userLeaseList = res;
-            this.isFirstTime = false;
-          }
+            if(!this.isRedirected){
+                this.isFirstTime = false;
+             } else{
+               this.loadLeaseData(this.edit_id);
+             }
         }
+      }
       });
-   
+    
   }  
 
   get f() {

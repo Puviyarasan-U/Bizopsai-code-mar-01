@@ -24,6 +24,11 @@ export class MailService {
     return this.http.post(url,detail)
       .map((res: Response) => res.json());
   }
-  
+
+  requestProfessionalMail(mail){
+    const url = `${this.apiRoot}/api/mail/request-professional/`+ mail
+    return this.http.get(url)
+      .map((res: Response) => res.json());
+ }
 
 }
